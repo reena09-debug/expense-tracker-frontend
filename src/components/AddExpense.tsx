@@ -1,11 +1,19 @@
 import { useState } from 'react'
+import Input from './Input'
 
 function AddExpense() {
   const [category, setCategory] = useState('')
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handleAdd = async () => {
+    setErrorMessage('')
+    if (!category || !amount || !date) {
+    setErrorMessage('All fields are required.')
+    return
+  }
+
     const response = await fetch('http://localhost:5069/api/Expenses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -18,40 +26,22 @@ function AddExpense() {
 
     if (response.ok) {
       console.log('Expense added successfully!')
+      setCategory('')
+      setAmount('')
+      setDate('')
     } else {
-      console.log('Something went wrong')
+      const message = await response.text()
+      setErrorMessage(message)
     }
   }
 
   return (
     <div className="card">
       <h2>Add Expense</h2>
-      <div className="input-group">
-        <input
-          className="input-field"
-          type="text"
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        />
-      </div>
-      <div className="input-group">
-        <input
-          className="input-field"
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
-      </div>
-      <div className="input-group">
-        <input
-          className="input-field"
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </div>
+      <Input type="text" placeholder="Category" value={category} onChange={setCategory} />
+      <Input type="number" placeholder="Amount" value={amount} onChange={setAmount} />
+      <Input type="date" placeholder="" value={date} onChange={setDate} />
+      {errorMessage && <div className="error-text">{errorMessage}</div>}
       <button className="btn-primary" onClick={handleAdd}>
         Add
       </button>
